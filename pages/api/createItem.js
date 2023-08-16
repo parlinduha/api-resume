@@ -1,3 +1,4 @@
+// pages/api/createItem.js
 import fs from 'fs';
 import path from 'path';
 
@@ -7,8 +8,6 @@ export default function handler(req, res) {
   }
 
   const { name } = req.body;
-
-  // Proses untuk membuat item baru dan menyimpannya ke dalam file JSON
   const newItem = { id: Date.now(), name };
 
   const dataDirectory = path.join(process.cwd(), 'data');
@@ -19,8 +18,9 @@ export default function handler(req, res) {
       ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
       : [];
 
-    const updatedData = [...existingData, newItem];
-    fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
+    existingData.push(newItem);
+
+    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
 
     res.status(201).json({ message: 'Item created successfully', newItem });
   } catch (error) {
