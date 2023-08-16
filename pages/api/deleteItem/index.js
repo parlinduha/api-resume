@@ -1,14 +1,16 @@
-// pages/api/createItem.js
 import fs from 'fs';
 import path from 'path';
 
 export default function handler(req, res) {
-  if (req.method !== 'POST') {
+  if (req.method !== 'DELETE') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { name } = req.body;
-  const newItem = { id: Date.now(), name };
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: 'ID is required' });
+  }
 
   const dataDirectory = path.join(process.cwd(), 'data');
   const filePath = path.join(dataDirectory, 'items.json');
@@ -18,12 +20,12 @@ export default function handler(req, res) {
       ? JSON.parse(fs.readFileSync(filePath, 'utf8'))
       : [];
 
-    existingData.push(newItem);
+    const updatedData = existingData.filter(item => item.id !== id);
 
-    fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
 
-    res.status(201).json({ message: 'Item created successfully', newItem });
+    res.status(200).json({ message: 'Item deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Error creating item' });
+    res.status(500).json({ error: 'Error deleting item' });
   }
 }
